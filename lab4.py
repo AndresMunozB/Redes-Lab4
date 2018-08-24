@@ -53,33 +53,33 @@ def getArrayBin(y_signal):
 			signalBin.append(int(bit))
 	return signalBin
 
-def ASKModulation(signalBin):
+def OOKModulation(signalBin):
 
 	A = 4
 	B = 5
-	bp = 0.1
+	bp = 1
 	br = 1/bp
 	f = br*10
-	t = np.arange(bp/99,bp,bp/99)
+	#t = np.arange(0,10,1)
+	t = np.arange(bp/100,bp + bp/100,bp/100)
 	ss = len(t)
 	modulated = []
 	count = 0
-	for bit in signalBin[:10000]:
+	for bit in signalBin[:5000]:
 		count +=1
 		if bit==1:
 			modulated = np.concatenate((modulated,A*cos(2*pi*f*t)))
 		else:
 			modulated = np.concatenate((modulated,0*cos(2*pi*f*t)))
-	t2 = np.arange(bp/99,bp*len(signalBin[:10000]), bp/99)
-	print(count)
+	t2 = np.arange(bp/100,bp*count + bp/100, bp/100)
 	return modulated, t2
 
 
 
 y_signal, rate_signal = getData("handel.wav")
 binarySignal = getArrayBin(y_signal)
-mod, t = ASKModulation(binarySignal)
+mod, t = OOKModulation(binarySignal)
 print(len(mod))
 print(len(t))
-plt.plot(t[:10000],mod[:10000])
+plt.plot(t[:5000],mod[:5000])
 plt.show()
