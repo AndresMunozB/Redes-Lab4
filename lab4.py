@@ -90,7 +90,7 @@ def digitalGraph(signalBin, title, figura):
 		for i in range(100):
 			visualBin.append(bit)
 	new_time = np.arange(bp/100, bp*len(visualBin) + bp/100, bp/100)
-	plt.plot(new_time[:10000], visualBin[:10000])
+	plt.plot(new_time[:datos], visualBin[:datos])
 	plt.ylim(-0.2,1.2)
 	plt.xlabel("Tiempo")
 	plt.ylabel("Amplitud")
@@ -106,7 +106,7 @@ Entrada: time2 	   -> Eje x del gráfico.
 		 title     -> Título del gráfico.
 		 figura    -> Nombre del archivo que se guardará.
 =============================================================================="""
-def modulatedGraph(time2,modulated,title,figura):
+def modulatedGraph(time2,modulated,title,figura,datos):
 	#Aquí se comienza a graficar la señal modulada
 	plt.ylim(-5,5)
 	plt.xlim(0, 0.05)
@@ -114,7 +114,7 @@ def modulatedGraph(time2,modulated,title,figura):
 	plt.ylabel("Amplitud")
 	plt.title(title)
 	plt.grid(True)
-	plt.plot(time2[:10000],modulated[:10000])
+	plt.plot(time2[:datos],modulated[:datos])
 	savefig(figura)
 	plt.show()
 
@@ -128,68 +128,37 @@ def transformData(signalBin,bp,datos):
 	new_time = np.arange(bp/100, bp*len(visualBin) + bp/100, bp/100)
 	return new_time,visualBin
 
-def graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos):
+
+def graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos):
 
 
-	bp = 0.001
-	graph1 = []
 	graph1_x, graph1_y = transformData(binarySignal,bp,datos)
-	graph1.append(graph1_x)
-	graph1.append(graph1_y)
-
-	graph2 = []
-	graph2.append(time2)
-	graph2.append(modulated)
-	graph3 = []
-	graph3.append(time2)
-	graph3.append(modulatedWithNoise)
-	graph4 = []
 	graph4_x, graph4_y = transformData(demodulated,bp,datos)
-	graph4.append(graph4_x)
-	graph4.append(graph4_y)
-	"""
-	plt.figure(1)
-	plt.subplot(221)
-	plt.xlabel("Tiempo")
-	plt.ylabel("Amplitud")
-	plt.title("Señal Original")
-	plt.plot(graph1[0][:datos],graph1[1][:datos],linewidth=0.4)
-	plt.subplot(222)
-	plt.xlabel("Tiempo")
-	plt.ylabel("Amplitud")
-	plt.title("Señal Modulada")
-	plt.plot(graph2[0][:datos],graph2[1][:datos],linewidth=0.4)
-	plt.subplot(223)
-	plt.xlabel("Tiempo")
-	plt.ylabel("Amplitud")
-	plt.title("Señal Modulada con ruido")
-	plt.plot(graph3[0][:datos],graph3[1][:datos],linewidth=0.4)
-	plt.subplot(224)
-	plt.xlabel("Tiempo")
-	plt.ylabel("Amplitud")
-	plt.title("Señal Demodulada")
-	plt.plot(graph4[0][:datos],graph4[1][:datos],linewidth=0.4)
-	plt.gca().yaxis.set_minor_formatter(NullFormatter())
-	plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
-	"""
-	f, axarr = plt.subplots(2, 2)
-	axarr[0, 0].plot(graph1[0][:datos], graph1[1][:datos],linewidth=0.4)
-	axarr[0, 0].set_title('Señal Original')
-	axarr[0, 1].plot(graph2[0][:datos], graph2[1][:datos],linewidth=0.4)
-	axarr[0, 1].set_title('Señal Modulada')
-	axarr[1, 0].plot(graph3[0][:datos], graph3[1][:datos],linewidth=0.4 )
-	axarr[1, 0].set_title('Señal Modulada con ruido')
-	axarr[1, 1].plot(graph4[0][:datos], graph4[1][:datos],linewidth=0.4)
-	axarr[1, 1].set_title('Señal Demodulada')
-	for ax in axarr.flat:
-	    ax.set(xlabel='Tiempo', ylabel='Amplitud')
-	# Hide x labels and tick labels for top plots and y ticks for right plots.
-	for ax in axarr.flat:
-	    ax.label_outer()
-	savefig("figura")
+
+	plt.subplot(2, 1, 1)
+	plt.plot(graph1_x[:datos], graph1_y[:datos],linewidth=0.4)
+	plt.title('A tale of 2 subplots')
+	plt.ylabel('Amplitud')
+
+	plt.subplot(2, 1, 2)
+	plt.plot(graph4_x[:datos], graph4_y[:datos],linewidth=0.4)
+	plt.xlabel('Tiempo')
+	plt.ylabel('Amplitud')
 	plt.show()
 
+def graphModulated(time2,modulated,modulatedWithNoise,datos):
 
+
+	plt.subplot(2, 1, 1)
+	plt.plot(time2[:datos], modulated[:datos],linewidth=0.4)
+	plt.title('A tale of 2 subplots')
+	plt.ylabel('Amplitud')
+
+	plt.subplot(2, 1, 2)
+	plt.plot(time2[:datos], modulatedWithNoise[:datos],linewidth=0.4)
+	plt.xlabel('Tiempo')
+	plt.ylabel('Amplitud')
+	plt.show()
 
 """==============================================================================
 Función: Función que agrega ruido a una señal.
@@ -211,7 +180,7 @@ Salida : modulated -> Señal modulada. (Eje Y)
 		 f         -> Frecuencia de modulación.
 		 time2     -> Intervalo de valores de tiempo para la nueva señal modulada.
 =============================================================================="""
-def OOKModulation(signalBin):
+def OOKModulation(signalBin,datos):
 
 	
 	A = 4
@@ -221,7 +190,7 @@ def OOKModulation(signalBin):
 	time = np.arange(bp/100,bp + bp/100,bp/100)
 	modulated = []
 	count = 0
-	for bit in signalBin[:10000]:
+	for bit in signalBin[:datos]:
 		count +=1
 		if bit==1:
 			modulated = np.concatenate((modulated,A*cos(2*pi*f*time)))
@@ -270,8 +239,12 @@ def printMenu():
 	print("2) Mostrar Señal Digital Modulada")
 	print("3) Mostrar Señal Digital Modulada con ruido")
 	print("4) Mostrar Señal Digital Demodulada")
-	print("5) Mostrar Todos los gráficos")
-	print("6) Salir\n\n")
+
+	print("5) Mostrar Señal Original y Demodulada")
+	print("6) Mostrar Señal Modulada con y sin ruido")
+	
+
+	print("7) Salir\n\n")
 
 
 
@@ -280,7 +253,8 @@ def printMenu():
 # Para temas de visualización y tiempo de ejecución
 # se decide mostrar solo 5000 datos, ya que si quisiera 
 # mostrar todos los datos tomaría mucho tiempo.
-
+datos = 10000
+bp = 0.001
 print("******Iniciando programa******")
 #  0) Se cargan los datos de la señal que se desea modular y demodular.
 y_signal, rate_signal, time_signal = getData("handel.wav")
@@ -291,7 +265,7 @@ snr = 10
 print("1.- Comenzando la modulación OOK, espere un momento...")
 print("\tLa señal tiene ", len(binarySignal), "bits")
 print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
-modulated, time, f,time2 = OOKModulation(binarySignal)
+modulated, time, f,time2 = OOKModulation(binarySignal,datos)
 
 #  2) Se añade ruido a la señal
 print("2.- Agregando ruido a la señal modulada, espere un momento...")
@@ -303,21 +277,25 @@ demodulated = OOKdemodulation(modulatedWithNoise,time,f)
 
 
 #  4) Aquí se muestra un menú para graficar los resultados obtenidos.
-datos = 10000
+
 menu = "0"
 printMenu()
 while(True):
 	
 	menu = str(input("Ingrese una opcion: "))
 	if(menu == "1"):
-		digitalGraph(binarySignal[:10000],"Señal Original","senal_original")
+		digitalGraph(binarySignal[:datos],"Señal Original","senal_original",datos)
 	elif(menu == "2"):
-		modulatedGraph(time2,modulated,"Señal Modulación OOK","modulacion_OOK" )
+		modulatedGraph(time2,modulated,"Señal Modulación OOK","modulacion_OOK" ,datos)
 	elif(menu == "3"):
-		modulatedGraph(time2,modulatedWithNoise,"Señal Modulación OOK con ruido","modulacion_OOK_con_ruido" )
+		modulatedGraph(time2,modulatedWithNoise,"Señal Modulación OOK con ruido","modulacion_OOK_con_ruido" ,datos)
 	elif(menu == "4"):
-		digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
+		digitalGraph(demodulated,"Señal al demodular","senal_demodulada",datos)
 	elif(menu == "5"):
-		graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos)
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos)
 	elif(menu == "6"):
+		#graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos)
+		
+		graphModulated(time2,modulated,modulatedWithNoise,datos)
+	elif(menu == "7"):
 		break
