@@ -61,10 +61,10 @@ def digitalGraph(signalBin, title, figura):
 	visualBin = []
 	bp = 0.001
 	for bit in signalBin:
-		for i in range(10):
+		for i in range(100):
 			visualBin.append(bit)
 	new_time = np.arange(bp/100, bp*len(visualBin) + bp/100, bp/100)
-	plt.plot(new_time[:1000], visualBin[:1000])
+	plt.plot(new_time[:10000], visualBin[:10000])
 	plt.ylim(-0.2,1.2)
 	plt.xlabel("Tiempo")
 	plt.ylabel("Amplitud")
@@ -85,7 +85,7 @@ def OOKModulation(signalBin):
 	time = np.arange(bp/100,bp + bp/100,bp/100)
 	modulated = []
 	count = 0
-	for bit in signalBin[:5000]:
+	for bit in signalBin[:10000]:
 		count +=1
 		if bit==1:
 			modulated = np.concatenate((modulated,A*cos(2*pi*f*time)))
@@ -100,7 +100,7 @@ def OOKModulation(signalBin):
 	plt.ylabel("Amplitud")
 	plt.title("Señal Modulación OOK")
 	plt.grid(True)
-	plt.plot(time2[:5000],modulated[:5000])
+	plt.plot(time2[:10000],modulated[:10000])
 	savefig("modulacion_OOK")
 	plt.show()
 	return modulated, time, f
@@ -137,7 +137,7 @@ binarySignal = getArrayBin(y_signal)
 # se decide mostrar solo 5000 datos, ya que si quisiera 
 # mostrar todos los datos tomaría mucho tiempo.
 print("1.- Digitalizando la señal, espero un momento...\n")
-digitalGraph(binarySignal[:5000],"Señal Original","senal_original")
+digitalGraph(binarySignal[:10000],"Señal Original","senal_original")
 modulated, time, f = OOKModulation(binarySignal)
 demodulated = OOKdemodulation(modulated,time,f)
 print("4.- Digitalizando la señal demodulada, espero un momento...\n")
