@@ -18,6 +18,7 @@ from scipy.fftpack import fft, ifft, fftshift
 import warnings 
 from scipy import integrate
 from math import pi
+from matplotlib.ticker import NullFormatter
 warnings.filterwarnings('ignore')
 
 
@@ -146,20 +147,45 @@ def graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos):
 	graph4_x, graph4_y = transformData(demodulated,bp,datos)
 	graph4.append(graph4_x)
 	graph4.append(graph4_y)
-
-
+	"""
+	plt.figure(1)
 	plt.subplot(221)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
 	plt.title("Señal Original")
 	plt.plot(graph1[0][:datos],graph1[1][:datos],linewidth=0.4)
 	plt.subplot(222)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
 	plt.title("Señal Modulada")
 	plt.plot(graph2[0][:datos],graph2[1][:datos],linewidth=0.4)
 	plt.subplot(223)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
 	plt.title("Señal Modulada con ruido")
 	plt.plot(graph3[0][:datos],graph3[1][:datos],linewidth=0.4)
 	plt.subplot(224)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
 	plt.title("Señal Demodulada")
 	plt.plot(graph4[0][:datos],graph4[1][:datos],linewidth=0.4)
+	plt.gca().yaxis.set_minor_formatter(NullFormatter())
+	plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+	"""
+	f, axarr = plt.subplots(2, 2)
+	axarr[0, 0].plot(graph1[0][:datos], graph1[1][:datos],linewidth=0.4)
+	axarr[0, 0].set_title('Señal Original')
+	axarr[0, 1].plot(graph2[0][:datos], graph2[1][:datos],linewidth=0.4)
+	axarr[0, 1].set_title('Señal Modulada')
+	axarr[1, 0].plot(graph3[0][:datos], graph3[1][:datos],linewidth=0.4 )
+	axarr[1, 0].set_title('Señal Modulada con ruido')
+	axarr[1, 1].plot(graph4[0][:datos], graph4[1][:datos],linewidth=0.4)
+	axarr[1, 1].set_title('Señal Demodulada')
+	for ax in axarr.flat:
+	    ax.set(xlabel='Tiempo', ylabel='Amplitud')
+	# Hide x labels and tick labels for top plots and y ticks for right plots.
+	for ax in axarr.flat:
+	    ax.label_outer()
 	savefig("figura")
 	plt.show()
 
