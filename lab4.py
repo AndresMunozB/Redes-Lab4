@@ -73,11 +73,21 @@ def digitalGraph(signalBin, title, figura):
 	savefig(figura)
 	plt.show()
 
+def modulatedGraph(time2,modulated):
+	#Aquí se comienza a graficar la señal modulada
+	plt.ylim(-5,5)
+	plt.xlim(0, 0.05)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
+	plt.title("Señal Modulación OOK")
+	plt.grid(True)
+	plt.plot(time2[:10000],modulated[:10000])
+	savefig("modulacion_OOK")
+	plt.show()
+
 def OOKModulation(signalBin):
 
-	print("2.- Comenzando la modulación OOK, espere un momento...")
-	print("\tLa señal tiene ", len(signalBin), "bits")
-	print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
+	
 	A = 4
 	bp = 0.001  #Periodo de bit
 	br = 1/bp   #Bit rate
@@ -92,22 +102,10 @@ def OOKModulation(signalBin):
 		else:
 			modulated = np.concatenate((modulated,0*cos(2*pi*f*time)))
 	time2 = np.arange(bp/100,bp*count + bp/100, bp/100)
-	
-	#Aquí se comienza a graficar la señal modulada
-	plt.ylim(-5,5)
-	plt.xlim(0, 0.05)
-	plt.xlabel("Tiempo")
-	plt.ylabel("Amplitud")
-	plt.title("Señal Modulación OOK")
-	plt.grid(True)
-	plt.plot(time2[:10000],modulated[:10000])
-	savefig("modulacion_OOK")
-	plt.show()
-	return modulated, time, f
+	return modulated, time, f,time2
 
 def OOKdemodulation(signalModulated,time, f):
 
-	print("3.- Comenzando demodulación, espere un momento...\n")
 	demodulated = []
 	bp = 0.001
 	len_modulated = len(signalModulated)
@@ -129,18 +127,40 @@ def OOKdemodulation(signalModulated,time, f):
 
 
 
-print("******Inicio del programa******")
-y_signal, rate_signal, time_signal = getData("handel.wav")
-binarySignal = getArrayBin(y_signal)
+
+
+def printMenu():
+	print("		Menu\n")
+	print("1) Mostrar Señal Digital Original")
+	print("2) Mostrar Señal Digital Modulada")
+	print("3) Mostrar Señal Digital Demodulada")
+	print("4) Salir\n\n")
+
+#BLOQUE PRINCIPAL
 
 # Para temas de visualización y tiempo de ejecución
 # se decide mostrar solo 5000 datos, ya que si quisiera 
 # mostrar todos los datos tomaría mucho tiempo.
-print("1.- Digitalizando la señal, espero un momento...\n")
-digitalGraph(binarySignal[:10000],"Señal Original","senal_original")
-modulated, time, f = OOKModulation(binarySignal)
-demodulated = OOKdemodulation(modulated,time,f)
-print("4.- Digitalizando la señal demodulada, espero un momento...\n")
-digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
-print("******Fin del programa******")
 
+print("******Iniciando programa******")
+y_signal, rate_signal, time_signal = getData("handel.wav")
+binarySignal = getArrayBin(y_signal)
+print("1.- Comenzando la modulación OOK, espere un momento...")
+print("\tLa señal tiene ", len(binarySignal), "bits")
+print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
+modulated, time, f,time2 = OOKModulation(binarySignal)
+print("2.- Comenzando demodulación, espere un momento...\n")
+demodulated = OOKdemodulation(modulated,time,f)
+menu = "0"
+printMenu()
+while(True):
+	
+	menu = str(input("Ingrese una opcion: "))
+	if(menu == "1"):
+		digitalGraph(binarySignal[:10000],"Señal Original","senal_original")
+	elif(menu == "2"):
+		modulatedGraph(time2,modulated)
+	elif(menu == "3"):
+		digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
+	elif(menu == "4"):
+		break
