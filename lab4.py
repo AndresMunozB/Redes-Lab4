@@ -30,7 +30,9 @@ warnings.filterwarnings('ignore')
 #==============================================================================
 def getData(nameFile):
 	rate_signal,y_signal=read(nameFile)
-	return y_signal, rate_signal
+	len_signal = len(y_signal)
+	time_signal = len_signal/rate_signal
+	return y_signal, rate_signal, time_signal
 
 
 def getBits(y_signal):
@@ -53,33 +55,56 @@ def getArrayBin(y_signal):
 			signalBin.append(int(bit))
 	return signalBin
 
+
+def digitalGraph(signalBin, time_signal):
+	visualBin = []
+	for bit in signalBin:
+		for i in range(10):
+			visualBin.append(bit)
+	new_time = np.linspace(0, time_signal, len(visualBin))
+	plt.plot(new_time[:1000], visualBin[:1000])
+	plt.ylim(-0.2,1.2)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
+	plt.title("Señal Digital")
+	plt.grid(True)
+	savefig("senal_digital")
+	plt.show()
+
 def OOKModulation(signalBin):
 
 	A = 4
-	B = 5
-	bp = 1
-	br = 1/bp
-	f = br*10
-	#t = np.arange(0,10,1)
-	t = np.arange(bp/100,bp + bp/100,bp/100)
-	ss = len(t)
+	bp = 0.001 #Periodo de bit
+	br = 1/bp   #Bit rate
+	f = br*10    #Cuantas ondas habrán en un tiempo de bit
+	time = np.arange(bp/100,bp + bp/100,bp/100)
 	modulated = []
 	count = 0
 	for bit in signalBin[:5000]:
 		count +=1
 		if bit==1:
-			modulated = np.concatenate((modulated,A*cos(2*pi*f*t)))
+			modulated = np.concatenate((modulated,A*cos(2*pi*f*time)))
 		else:
-			modulated = np.concatenate((modulated,0*cos(2*pi*f*t)))
-	t2 = np.arange(bp/100,bp*count + bp/100, bp/100)
-	return modulated, t2
+			modulated = np.concatenate((modulated,0*cos(2*pi*f*time)))
+	time2 = np.arange(bp/100,bp*count + bp/100, bp/100)
+	
+	#Aquí se comienza a graficar la señal modulada
+	plt.ylim(-5,5)
+	plt.xlim(0, 0.05)
+	plt.xlabel("Tiempo")
+	plt.ylabel("Amplitud")
+	plt.title("Señal Modulación OOK")
+	plt.grid(True)
+	plt.plot(time2[:5000],modulated[:5000])
+	savefig("modulacion_OOK")
+	plt.show()
 
 
 
-y_signal, rate_signal = getData("handel.wav")
+
+print("Inicio del programa")
+y_signal, rate_signal, time_signal = getData("handel.wav")
 binarySignal = getArrayBin(y_signal)
-mod, t = OOKModulation(binarySignal)
-print(len(mod))
-print(len(t))
-plt.plot(t[:5000],mod[:5000])
-plt.show()
+digitalGraph(binarySignal,time_signal)
+OOKModulation(binarySignal)
+
