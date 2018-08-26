@@ -118,6 +118,53 @@ def modulatedGraph(time2,modulated,title,figura):
 	plt.show()
 
 
+def transformData(signalBin,bp,datos):
+	visualBin = []
+	bp = 0.001
+	for bit in signalBin[:datos]:
+		for i in range(100):
+			visualBin.append(bit)
+	new_time = np.arange(bp/100, bp*len(visualBin) + bp/100, bp/100)
+	return new_time,visualBin
+
+def graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos):
+
+
+	bp = 0.001
+	graph1 = []
+	graph1_x, graph1_y = transformData(binarySignal,bp,datos)
+	graph1.append(graph1_x)
+	graph1.append(graph1_y)
+
+	graph2 = []
+	graph2.append(time2)
+	graph2.append(modulated)
+	graph3 = []
+	graph3.append(time2)
+	graph3.append(modulatedWithNoise)
+	graph4 = []
+	graph4_x, graph4_y = transformData(demodulated,bp,datos)
+	graph4.append(graph4_x)
+	graph4.append(graph4_y)
+
+
+	plt.subplot(221)
+	plt.title("Señal Original")
+	plt.plot(graph1[0][:datos],graph1[1][:datos],linewidth=0.4)
+	plt.subplot(222)
+	plt.title("Señal Modulada")
+	plt.plot(graph2[0][:datos],graph2[1][:datos],linewidth=0.4)
+	plt.subplot(223)
+	plt.title("Señal Modulada con ruido")
+	plt.plot(graph3[0][:datos],graph3[1][:datos],linewidth=0.4)
+	plt.subplot(224)
+	plt.title("Señal Demodulada")
+	plt.plot(graph4[0][:datos],graph4[1][:datos],linewidth=0.4)
+	plt.show()
+	savefig("figura")
+
+
+
 """==============================================================================
 Función: Función que agrega ruido a una señal.
 Entrada: signal -> Señal a la cual se le agregará ruido.
@@ -197,7 +244,8 @@ def printMenu():
 	print("2) Mostrar Señal Digital Modulada")
 	print("3) Mostrar Señal Digital Modulada con ruido")
 	print("4) Mostrar Señal Digital Demodulada")
-	print("5) Salir\n\n")
+	print("5) Mostrar Todos los gráficos")
+	print("6) Salir\n\n")
 
 
 
@@ -229,6 +277,7 @@ demodulated = OOKdemodulation(modulatedWithNoise,time,f)
 
 
 #  4) Aquí se muestra un menú para graficar los resultados obtenidos.
+datos = 10000
 menu = "0"
 printMenu()
 while(True):
@@ -243,4 +292,6 @@ while(True):
 	elif(menu == "4"):
 		digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
 	elif(menu == "5"):
+		graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos)
+	elif(menu == "6"):
 		break
