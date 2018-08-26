@@ -12,7 +12,7 @@ import scipy.signal as signal
 import numpy as np
 from scipy.io.wavfile import read,write
 import matplotlib.pyplot as plt
-from numpy import arange, linspace, cos, pi
+from numpy import arange, linspace, cos, pi,random
 from pylab import savefig
 from scipy.fftpack import fft, ifft, fftshift
 import warnings 
@@ -34,18 +34,34 @@ def getData(nameFile):
 	time_signal = len_signal/rate_signal
 	return y_signal, rate_signal, time_signal
 
-
+"""
+Función: Dada una señal, se obtiene la cantidad de bits para poder representar sus datos.
+Entrada: y_signal -> Señal de la cual se obtiene la cantidad maxima de bits.
+Salida:  len_bin -> Cantidad de bits necesesarios para representar todos los datos.
+"""
 def getBits(y_signal):
 	maximum = max(y_signal)
 	maxbin = format(maximum,"b")
-	return len(maxbin)+1 #PARA AÑADIR UN BIT DE SIGNO NEGATIVO
-
+	len_bin =  len(maxbin)+1
+	return len_bin #PARA AÑADIR UN BIT DE SIGNO NEGATIVO
+"""
+Función: Función que rellena de ceros y modifica el formato de un número negativo binario.
+Entrada: value -> valor que se desea modificar
+		 bits  -> Cantidad de bits que debe tener el nuevo número
+Salida:  binvalue -> valor resultante al remplazar el "-" por el "1" y rellenar con  
+					 ceros hasta obtener un largo igual a "bits".
+"""
 def binarize(value, bits):
 	binvalue = format(value,"b").zfill(bits)
 	if(binvalue[0]=="-"):
 		binvalue = "1"+binvalue[1:]
 	return binvalue
 
+"""
+Función: Función que se encarga de transformar la señal a una señal digital.
+Entrada: y_signal -> Señal que se transformará a una señal digital.
+Salida : signalBin -> Señal digitalizada, es decir, tiene solo valores 0 ó 1.
+"""
 def getArrayBin(y_signal):
 	signalBin = []
 	maxbits = getBits(y_signal)
@@ -55,7 +71,12 @@ def getArrayBin(y_signal):
 			signalBin.append(int(bit))
 	return signalBin
 
-
+"""
+Función: Función que grafica y guarda una señal digital.
+Entrada: signalBin -> Señal digital que se desea graficar.
+		 title     -> Título del gráfico.
+		 figura    -> Nombre del archivo que se guardará.
+"""
 def digitalGraph(signalBin, title, figura):
 	
 	visualBin = []
@@ -73,18 +94,44 @@ def digitalGraph(signalBin, title, figura):
 	savefig(figura)
 	plt.show()
 
-def modulatedGraph(time2,modulated):
+"""
+Función: Función que grafica y guarda una una señal modulada con o sin ruido.
+Entrada: time2 	   -> Eje x del gráfico.
+		 modulated -> Señal modulada que se desea graficar.
+		 title     -> Título del gráfico.
+		 figura    -> Nombre del archivo que se guardará.
+"""
+def modulatedGraph(time2,modulated,title,figura):
 	#Aquí se comienza a graficar la señal modulada
 	plt.ylim(-5,5)
 	plt.xlim(0, 0.05)
 	plt.xlabel("Tiempo")
 	plt.ylabel("Amplitud")
-	plt.title("Señal Modulación OOK")
+	plt.title(title)
 	plt.grid(True)
 	plt.plot(time2[:10000],modulated[:10000])
-	savefig("modulacion_OOK")
+	savefig(figura)
 	plt.show()
+"""
+Función: Función que agrega ruido a una señal.
+Entrada: signal -> Señal a la cual se le agregará ruido.
+		 snr    -> Relación entre la señal y el ruido.
+Salida : signal_with_noise -> Señal con ruido agregado.
+"""
+def addNoise(signal, snr):
+    noise = random.normal(0.0, 1.0/snr, len(signal))
+    signal_with_noise = signal + noise
+    return signal_with_noise, noise
 
+
+"""
+Función: Función que modula una señal digital con el método OOK.
+Entrada: signalBin -> Señal que se modulará.
+Salida : modulated -> Señal modulada. (Eje Y)
+		 time      -> Intervalo de tiempo en un periodo de bit.
+		 f         -> Frecuencia de modulación.
+		 time2     -> Intervalo de valores de tiempo para la nueva señal modulada.
+"""
 def OOKModulation(signalBin):
 
 	
@@ -104,6 +151,14 @@ def OOKModulation(signalBin):
 	time2 = np.arange(bp/100,bp*count + bp/100, bp/100)
 	return modulated, time, f,time2
 
+"""
+Función: Función que demodula una señal digital modulada.
+Entrada: signalModulated -> Señal que se modulará.
+		 time -> Intervalo de tiempo en un periodo de bit.
+		 f         -> Frecuencia de modulación.
+Salida : demodulated -> Señal demodulada. 
+		 
+"""
 def OOKdemodulation(signalModulated,time, f):
 
 	demodulated = []
@@ -128,13 +183,18 @@ def OOKdemodulation(signalModulated,time, f):
 
 
 
-
+"""
+Función: Que imprime las opciones del menú.
+"""
 def printMenu():
 	print("		Menu\n")
 	print("1) Mostrar Señal Digital Original")
 	print("2) Mostrar Señal Digital Modulada")
-	print("3) Mostrar Señal Digital Demodulada")
-	print("4) Salir\n\n")
+	print("3) Mostrar Señal Digital Modulada con ruido")
+	print("4) Mostrar Señal Digital Demodulada")
+	print("5) Salir\n\n")
+
+
 
 #BLOQUE PRINCIPAL
 
@@ -143,14 +203,27 @@ def printMenu():
 # mostrar todos los datos tomaría mucho tiempo.
 
 print("******Iniciando programa******")
+#  0) Se cargan los datos de la señal que se desea modular y demodular.
 y_signal, rate_signal, time_signal = getData("handel.wav")
 binarySignal = getArrayBin(y_signal)
+snr = 10
+
+#  1) Se modula la señal 
 print("1.- Comenzando la modulación OOK, espere un momento...")
 print("\tLa señal tiene ", len(binarySignal), "bits")
 print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
 modulated, time, f,time2 = OOKModulation(binarySignal)
-print("2.- Comenzando demodulación, espere un momento...\n")
-demodulated = OOKdemodulation(modulated,time,f)
+
+#  2) Se añade ruido a la señal
+print("2.- Agregando ruido a la señal modulada, espere un momento...")
+modulatedWithNoise, noise = addNoise(modulated, snr)
+
+#  3) Se demodula la señal con ruido.
+print("3.- Comenzando demodulación, espere un momento...\n")
+demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+
+
+#  4) Aquí se muestra un menú para graficar los resultados obtenidos.
 menu = "0"
 printMenu()
 while(True):
@@ -159,8 +232,10 @@ while(True):
 	if(menu == "1"):
 		digitalGraph(binarySignal[:10000],"Señal Original","senal_original")
 	elif(menu == "2"):
-		modulatedGraph(time2,modulated)
+		modulatedGraph(time2,modulated,"Señal Modulación OOK","modulacion_OOK" )
 	elif(menu == "3"):
-		digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
+		modulatedGraph(time2,modulatedWithNoise,"Señal Modulación OOK con ruido","modulacion_OOK_con_ruido" )
 	elif(menu == "4"):
+		digitalGraph(demodulated,"Señal al demodular","senal_demodulada")
+	elif(menu == "5"):
 		break
