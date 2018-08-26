@@ -160,8 +160,8 @@ def graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos):
 	plt.subplot(224)
 	plt.title("Señal Demodulada")
 	plt.plot(graph4[0][:datos],graph4[1][:datos],linewidth=0.4)
-	plt.show()
 	savefig("figura")
+	plt.show()
 
 
 
