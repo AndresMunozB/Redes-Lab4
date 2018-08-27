@@ -269,11 +269,16 @@ modulated, time, f,time2 = OOKModulation(binarySignal,datos)
 
 #  2) Se añade ruido a la señal
 print("2.- Agregando ruido a la señal modulada, espere un momento...")
-modulatedWithNoise, noise = addNoise(modulated, snr)
+modulatedWithNoise1, noise = addNoise(modulated, 100)
+modulatedWithNoise2, noise = addNoise(modulated, 10)
+modulatedWithNoise3, noise = addNoise(modulated, 1)
+modulatedWithNoise4, noise = addNoise(modulated, 0.1)
+modulatedWithNoise5, noise = addNoise(modulated, 0.5)
+
 
 #  3) Se demodula la señal con ruido.
 print("3.- Comenzando demodulación, espere un momento...\n")
-demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+demodulated = OOKdemodulation(modulatedWithNoise1,time,f)
 
 
 #  4) Aquí se muestra un menú para graficar los resultados obtenidos.
@@ -296,6 +301,10 @@ while(True):
 	elif(menu == "6"):
 		#graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos)
 		
-		graphModulated(time2,modulated,modulatedWithNoise,datos)
+		graphModulated(time2,modulated,modulatedWithNoise1,datos)
+		graphModulated(time2,modulated,modulatedWithNoise2,datos)
+		graphModulated(time2,modulated,modulatedWithNoise3,datos)
+		graphModulated(time2,modulated,modulatedWithNoise4,datos)
+		graphModulated(time2,modulated,modulatedWithNoise5,datos)
 	elif(menu == "7"):
 		break
