@@ -260,7 +260,7 @@ def printMenu():
 	print("		Menu\n")
 	print("1) Mostrar Señal Digital Original")
 	print("2) Mostrar Señal Digital Modulada")
-	print("3) Mostrar estudio con SNR = 0.5")
+	print("3) Mostrar estudio con SNR = 0.2")
 	print("4) Mostrar estudio con SNR = 0.1")
 	print("5) Mostrar estudio con SNR = 0.05")
 	print("6) Mostrar estudio con SNR = 0.025")
@@ -328,7 +328,7 @@ while(True):
 	elif(menu == "4"):
 		modulatedWithNoise, noise = addNoise(modulated, 0.1)
 		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
-		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 1","Ruido1")
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 0.1","Ruido1")
 		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.1","01SNR")
 		
 	elif(menu == "5"):
