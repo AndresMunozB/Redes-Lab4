@@ -81,8 +81,9 @@ Función: Función que grafica y guarda una señal digital.
 Entrada: signalBin -> Señal digital que se desea graficar.
 		 title     -> Título del gráfico.
 		 figura    -> Nombre del archivo que se guardará.
+		 datos	   -> Cantidad de bits a mostrar
 =============================================================================="""
-def digitalGraph(signalBin, title, figura):
+def digitalGraph(signalBin, title, figura,datos):
 	
 	visualBin = []
 	bp = 0.001
@@ -109,7 +110,6 @@ Entrada: time2 	   -> Eje x del gráfico.
 def modulatedGraph(time2,modulated,title,figura,datos):
 	#Aquí se comienza a graficar la señal modulada
 	plt.ylim(-5,5)
-	plt.xlim(0, 0.05)
 	plt.xlabel("Tiempo")
 	plt.ylabel("Amplitud")
 	plt.title(title)
@@ -129,35 +129,44 @@ def transformData(signalBin,bp,datos):
 	return new_time,visualBin
 
 
-def graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos):
+
+def graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, title, figura):
 
 
 	graph1_x, graph1_y = transformData(binarySignal,bp,datos)
 	graph4_x, graph4_y = transformData(demodulated,bp,datos)
 
 	plt.subplot(2, 1, 1)
+	plt.ylim(-0.2,1.2)
+	plt.grid(True)
 	plt.plot(graph1_x[:datos], graph1_y[:datos],linewidth=0.4)
-	plt.title('A tale of 2 subplots')
+	plt.title(title)
 	plt.ylabel('Amplitud')
 
 	plt.subplot(2, 1, 2)
+	plt.ylim(-0.2,1.2)
+	plt.grid(True)
 	plt.plot(graph4_x[:datos], graph4_y[:datos],linewidth=0.4)
 	plt.xlabel('Tiempo')
 	plt.ylabel('Amplitud')
+	savefig(figura)
 	plt.show()
 
-def graphModulated(time2,modulated,modulatedWithNoise,datos):
+
+
+def graphModulated(time2,modulated,modulatedWithNoise,datos, title, figura):
 
 
 	plt.subplot(2, 1, 1)
 	plt.plot(time2[:datos], modulated[:datos],linewidth=0.4)
-	plt.title('A tale of 2 subplots')
+	plt.title(title)
 	plt.ylabel('Amplitud')
 
 	plt.subplot(2, 1, 2)
 	plt.plot(time2[:datos], modulatedWithNoise[:datos],linewidth=0.4)
 	plt.xlabel('Tiempo')
 	plt.ylabel('Amplitud')
+	savefig(figura)
 	plt.show()
 
 """==============================================================================
@@ -165,6 +174,7 @@ Función: Función que agrega ruido a una señal.
 Entrada: signal -> Señal a la cual se le agregará ruido.
 		 snr    -> Relación entre la señal y el ruido.
 Salida : signal_with_noise -> Señal con ruido agregado.
+		 noise -> ruido para la señal.
 =============================================================================="""
 def addNoise(signal, snr):
     noise = random.normal(0.0, 1.0/snr, len(signal))
@@ -219,7 +229,7 @@ def OOKdemodulation(signalModulated,time, f):
 		dm_aux = carrier*signalModulated[i-aux:i] 
 		integral = integrate.trapz(dm_aux,time)
 		integral2 = round((2*integral/bp))
-		if(integral2 > 2): #Al ser OOK (A + 0)/2 = 2
+		if(integral2 >= 2.0): #Al ser OOK (A + 0)/2 = 2
 			bit = 1
 		else:
 			bit = 0
@@ -227,8 +237,21 @@ def OOKdemodulation(signalModulated,time, f):
 		demodulated.append(bit)
 	return demodulated
 
+def obtainError(signalBin, demodulated):
+	count = 0
+	for i in range(len(signalBin)):
+		if signalBin[i] != demodulated[i]:
+			count +=1
+	return (count*100)/len(signalBin)
 
 
+def graphSNR(SNRList, errors, figura):
+	plt.plot(SNRList,errors)
+	plt.ylabel("Tasa de error (%)")
+	plt.xlabel("SNR")
+	plt.title("Tasa de error vs SNR")
+	savefig(figura)
+	plt.show()
 
 """==============================================================================
 Función: Que imprime las opciones del menú.
@@ -237,14 +260,15 @@ def printMenu():
 	print("		Menu\n")
 	print("1) Mostrar Señal Digital Original")
 	print("2) Mostrar Señal Digital Modulada")
-	print("3) Mostrar Señal Digital Modulada con ruido")
-	print("4) Mostrar Señal Digital Demodulada")
-
-	print("5) Mostrar Señal Original y Demodulada")
-	print("6) Mostrar Señal Modulada con y sin ruido")
+	print("3) Mostrar estudio con SNR = 0.5")
+	print("4) Mostrar estudio con SNR = 0.1")
+	print("5) Mostrar estudio con SNR = 0.05")
+	print("6) Mostrar estudio con SNR = 0.025")
+	print("7) Mostrar estudio con SNR = 0.0125")
+	print("8) Mostrar gráfico de tasas de errores según SNR")
 	
 
-	print("7) Salir\n\n")
+	print("9) Salir\n\n")
 
 
 
@@ -268,20 +292,23 @@ print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
 modulated, time, f,time2 = OOKModulation(binarySignal,datos)
 
 #  2) Se añade ruido a la señal
-print("2.- Agregando ruido a la señal modulada, espere un momento...")
-modulatedWithNoise1, noise = addNoise(modulated, 100)
-modulatedWithNoise2, noise = addNoise(modulated, 10)
-modulatedWithNoise3, noise = addNoise(modulated, 1)
-modulatedWithNoise4, noise = addNoise(modulated, 0.1)
-modulatedWithNoise5, noise = addNoise(modulated, 0.5)
+print("2.- Calculando errores, espere un momento...")
+print("\tLos SNR usados son: 0.5, 0.1, 0.05, 0.025 y 0.0125")
+SNRList = [0.2, 0.1, 0.05, 0.025, 0.0125]
+errors = []
+for snr in SNRList:
+	modulatedWithNoise, noise = addNoise(modulated, snr)
+	demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+	error = obtainError(binarySignal[:datos], demodulated)
+	errors.append(error)
 
 
-#  3) Se demodula la señal con ruido.
-print("3.- Comenzando demodulación, espere un momento...\n")
-demodulated = OOKdemodulation(modulatedWithNoise1,time,f)
 
 
-#  4) Aquí se muestra un menú para graficar los resultados obtenidos.
+
+
+
+#  3) Aquí se muestra un menú para graficar los resultados obtenidos.
 
 menu = "0"
 printMenu()
@@ -293,18 +320,36 @@ while(True):
 	elif(menu == "2"):
 		modulatedGraph(time2,modulated,"Señal Modulación OOK","modulacion_OOK" ,datos)
 	elif(menu == "3"):
-		modulatedGraph(time2,modulatedWithNoise,"Señal Modulación OOK con ruido","modulacion_OOK_con_ruido" ,datos)
-	elif(menu == "4"):
-		digitalGraph(demodulated,"Señal al demodular","senal_demodulada",datos)
-	elif(menu == "5"):
-		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos)
-	elif(menu == "6"):
-		#graphAll(binarySignal,time2,modulated,demodulated,modulatedWithNoise,datos)
+		modulatedWithNoise, noise = addNoise(modulated, 0.2)
+		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 0.2","Ruido02")
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.2","02SNR")
 		
-		graphModulated(time2,modulated,modulatedWithNoise1,datos)
-		graphModulated(time2,modulated,modulatedWithNoise2,datos)
-		graphModulated(time2,modulated,modulatedWithNoise3,datos)
-		graphModulated(time2,modulated,modulatedWithNoise4,datos)
-		graphModulated(time2,modulated,modulatedWithNoise5,datos)
+	elif(menu == "4"):
+		modulatedWithNoise, noise = addNoise(modulated, 0.1)
+		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 1","Ruido1")
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.1","01SNR")
+		
+	elif(menu == "5"):
+		modulatedWithNoise, noise = addNoise(modulated, 0.05)
+		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 0.05","Ruido005")
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.05","005SNR")
+		
+	elif(menu == "6"):
+		modulatedWithNoise, noise = addNoise(modulated, 0.025)
+		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 0.025","Ruido0025")
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.025","0025SNR")
+		
 	elif(menu == "7"):
+		modulatedWithNoise, noise = addNoise(modulated, 0.0125)
+		demodulated = OOKdemodulation(modulatedWithNoise,time,f)
+		graphModulated(time2,modulated,modulatedWithNoise,datos,"Señal Modulada y Señal con Ruido SNR = 0.0125","Ruido00125")	
+		graphOriginalAndDemodulate(binarySignal,demodulated,bp,datos, "Señal Original y Demodulada con SNR = 0.0125","00125SNR")
+		
+	elif(menu == "8"):
+		graphSNR(SNRList,errors,"SNRErrors")		
+	elif(menu == "9"):	
 		break
