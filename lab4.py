@@ -288,7 +288,7 @@ snr = 10
 #  1) Se modula la señal 
 print("1.- Comenzando la modulación OOK, espere un momento...")
 print("\tLa señal tiene ", len(binarySignal), "bits")
-print("\tSe ha escogido un bit rate de 100 bits por segundo\n")
+print("\tSe ha escogido un bit rate de 1000 bits por segundo\n")
 modulated, time, f,time2 = OOKModulation(binarySignal,datos)
 
 #  2) Se añade ruido a la señal
